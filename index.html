@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis 15 Años - Invitación Real</title>
+    
+    <!-- Fuentes Elegantes -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Librerías de Estilos y Animaciones -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        :root {
+            --primary: #1a3a5f;
+            --secondary: #4a90e2;
+            --accent: #d4af37; /* Dorado para toque premium */
+        }
+        body { font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
+        .font-title { font-family: 'Great Vibes', cursive; }
+        .font-royal { font-family: 'Cinzel', serif; }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+
+        .bg-sparkle {
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+        }
+
+        /* Animación suave de fondo */
+        .gradient-bg {
+            background: linear-gradient(-45deg, #0f172a, #1e3a8a, #3b82f6, #1d4ed8);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="gradient-bg text-white overflow-x-hidden" x-data="invitationApp()">
+
+    <!-- PANTALLA DE INICIO (OVERLAY) -->
+    <div x-show="!started" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-slate-900 text-center p-6" x-transition.opacity>
+        <div class="animate__animated animate__fadeIn">
+            <h2 class="font-royal text-2xl mb-4 tracking-widest">BIENVENIDOS A UN CUENTO DE HADAS</h2>
+            <div class="w-32 h-32 mx-auto mb-6 relative">
+                <!-- Icono de zapato de cristal decorativo -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="text-blue-300 animate-pulse">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 13c0-4.5-3.5-7-3.5-7s-1.5 2-4.5 2-4.5-2-4.5-2S5 8.5 5 13c0 3 2 5 5 5h6c3 0 5-2 5-5z" />
+                </svg>
+            </div>
+            <button @click="startExperience" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 rounded-full font-semibold tracking-widest transition-all transform hover:scale-110 shadow-lg shadow-blue-500/50">
+                INGRESAR A LA INVITACIÓN
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main x-show="started" x-cloak class="bg-sparkle min-h-screen">
+
+        <!-- BOTÓN MÚSICA FLOTANTE -->
+        <button @click="toggleMusic" class="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-xl">
+            <template x-if="playing">
+                <span class="block w-6 h-6">🔊</span>
+            </template>
+            <template x-if="!playing">
+                <span class="block w-6 h-6">🔇</span>
+            </template>
+        </button>
+
+        <!-- SECCIÓN 1: HEADER (TEXTO EDITABLE) -->
+        <header class="min-h-screen flex flex-col items-center justify-center text-center p-6">
+            <div class="animate__animated animate__fadeInDown">
+                <p class="font-royal text-blue-200 tracking-[0.3em] mb-4" x-text="config.textoInicioSub"></p>
+                <h1 class="font-title text-7xl md:text-9xl mb-6 text-blue-100" x-text="config.nombreQuinceanera"></h1>
+                <p class="max-w-md mx-auto text-lg italic opacity-90" x-text="config.fraseInicio"></p>
+            </div>
+            <div class="mt-20 animate-bounce">
+                <span class="text-3xl">↓</span>
+            </div>
+        </header>
+
+        <!-- SECCIÓN 2: CUENTA REGRESIVA -->
+        <section class="py-20 px-6">
+            <div class="max-w-4xl mx-auto glass-card p-10 text-center">
+                <h3 class="font-royal text-xl mb-8 tracking-widest">FALTAN SOLO...</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <template x-for="(val, unit) in countdown" :key="unit">
+                        <div>
+                            <div class="text-3xl md:text-5xl font-bold" x-text="val"></div>
+                            <div class="text-xs uppercase opacity-70" x-text="unit"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: UBICACIÓN (MODULAR) -->
+        <template x-if="config.secciones.ubicacion">
+            <section class="py-20 px-6 text-center">
+                <div class="max-w-2xl mx-auto">
+                    <span class="text-5xl mb-4 block">📍</span>
+                    <h2 class="font-royal text-3xl mb-4">¿DÓNDE Y CUÁNDO?</h2>
+                    <p class="text-xl mb-2 font-semibold" x-text="config.datosEvento.salon"></p>
+                    <p class="opacity-80 mb-6" x-text="config.datosEvento.direccion"></p>
+                    <p class="text-2xl font-royal text-blue-300 mb-8" x-text="config.datosEvento.fechaHora"></p>
+                    <a :href="config.links.googleMaps" target="_blank" class="inline-block px-8 py-3 border border-white/50 rounded-full hover:bg-white hover:text-blue-900 transition">
+                        VER UBICACIÓN GPS
+                    </a>
+                </div>
+            </section>
+        </template>
+
+        <!-- SECCIÓN 4: GALERÍA DE FOTOS (DINÁMICA) -->
+        <template x-if="config.secciones.galeria">
+            <section class="py-20 px-4 bg-white/5">
+                <h2 class="font-royal text-3xl text-center mb-12">GALERÍA REAL</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+                    <template x-for="i in config.galeria.cantidad">
+                        <div class="aspect-[3/4] overflow-hidden rounded-lg shadow-2xl transform hover:scale-105 transition duration-500">
+                            <img :src="'foto' + i + '.jpg'" class="w-full h-full object-cover" :alt="'Foto ' + i">
+                        </div>
+                    </template>
+                </div>
+            </section>
+        </template>
+
+        <!-- SECCIÓN 5: DRESS CODE & REGALOS -->
+        <section class="py-20 px-6 grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+            <template x-if="config.secciones.dressCode">
+                <div class="glass-card p-10 text-center">
+                    <span class="text-5xl mb-4 block">👗</span>
+                    <h3 class="font-royal text-2xl mb-4">DRESS CODE</h3>
+                    <p class="opacity-90" x-text="config.dressCode.tipo"></p>
+                    <p class="text-sm italic mt-2" x-text="config.dressCode.nota"></p>
+                </div>
+            </template>
+
+            <template x-if="config.secciones.regalos">
+                <div class="glass-card p-10 text-center">
+                    <span class="text-5xl mb-4 block">🎁</span>
+                    <h3 class="font-royal text-2xl mb-4">REGALOS</h3>
+                    <p class="text-sm mb-4" x-text="config.regalos.texto"></p>
+                    <div class="bg-white/10 p-4 rounded text-left text-sm font-mono overflow-x-auto">
+                        <p>Alias: <span x-text="config.regalos.alias"></span></p>
+                        <p>CBU: <span x-text="config.regalos.cbu"></span></p>
+                        <p>Banco: <span x-text="config.regalos.banco"></span></p>
+                    </div>
+                </div>
+            </template>
+        </section>
+
+        <!-- SECCIÓN 6: INTERACCIÓN (PLAYLIST & DRIVE) -->
+        <section class="py-20 px-6 text-center">
+            <div class="max-w-4xl mx-auto space-y-12">
+                <template x-if="config.secciones.playlist">
+                    <div>
+                        <h3 class="font-royal text-2xl mb-6">¿QUÉ CANCIÓN NO PUEDE FALTAR?</h3>
+                        <a :href="config.links.playlist" target="_blank" class="inline-flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-500 rounded-full transition shadow-lg shadow-green-900/40">
+                            <span>🎵</span> SUGERIR CANCIÓN EN SPOTIFY
+                        </a>
+                    </div>
+                </template>
+
+                <template x-if="config.secciones.albumDrive">
+                    <div class="pt-10 border-t border-white/10">
+                        <h3 class="font-royal text-2xl mb-6">COMPARTE TUS FOTOS DEL EVENTO</h3>
+                        <a :href="config.links.driveAlbum" target="_blank" class="inline-flex items-center gap-3 px-8 py-4 bg-blue-500 hover:bg-blue-400 rounded-full transition shadow-lg shadow-blue-900/40">
+                            <span>📸</span> SUBIR FOTOS AL ÁLBUM
+                        </a>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 7: CONFIRMACIÓN -->
+        <section class="py-20 px-6 bg-white text-blue-900 text-center">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="font-royal text-4xl mb-6">CONFIRMACIÓN</h2>
+                <p class="mb-8 text-lg">Es muy importante para mí que estés presente en esta noche mágica.</p>
+                <a :href="config.links.rsvpForm" target="_blank" class="inline-block px-12 py-4 bg-blue-900 text-white rounded-full font-bold tracking-widest hover:bg-blue-800 transition transform hover:-translate-y-1">
+                    CONFIRMAR ASISTENCIA
+                </a>
+                <p class="mt-4 text-sm opacity-60">Por favor confirmar antes del <span x-text="config.datosEvento.fechaLimite"></span></p>
+            </div>
+        </section>
+
+        <!-- FOOTER (TEXTO EDITABLE AL FINAL) -->
+        <footer class="py-20 px-6 text-center">
+            <p class="font-title text-5xl mb-4 text-blue-200" x-text="config.textoFinal"></p>
+            <p class="font-royal tracking-widest opacity-50 text-xs">DISEÑADO PARA UNA PRINCESA</p>
+        </footer>
+
+    </main>
+
+    <!-- ELEMENTO DE AUDIO -->
+    <audio id="bgMusic" loop>
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function invitationApp() {
+            return {
+                /* ============================================================
+                   APARTADO DE CONFIGURACIÓN (EDITA AQUÍ TUS DATOS)
+                   ============================================================ */
+                config: {
+                    nombreQuinceanera: "Valentina",
+                    textoInicioSub: "MIS 15 AÑOS",
+                    fraseInicio: "Hoy comienza una nueva etapa en mi vida, y no hay nada que me haga más feliz que compartirla contigo. Te espero para celebrar mis 15 años.",
+                    textoFinal: "Te espero para vivir este sueño...",
+                    
+                    // Fechas (Formato: Año, Mes-1, Día, Hora) - El mes empieza en 0 (Enero es 0)
+                    fechaEvento: new Date(2025, 11, 15, 21, 0, 0), 
+
+                    datosEvento: {
+                        salon: "Palacio de Cristal Eventos",
+                        direccion: "Av. de los Príncipes 1234, Ciudad Real",
+                        fechaHora: "Sábado 15 de Diciembre - 21:00 Hs",
+                        fechaLimite: "01 de Diciembre"
+                    },
+
+                    dressCode: {
+                        tipo: "Elegante / Gala",
+                        nota: "Se reserva el color azul para la quinceañera"
+                    },
+
+                    regalos: {
+                        texto: "Tu presencia es mi mejor regalo, pero si deseas colaborar con mi viaje de sueños:",
+                        alias: "VALENTINA.15.DREAMS",
+                        cbu: "00000031000123456789",
+                        banco: "Banco Real"
+                    },
+
+                    links: {
+                        googleMaps: "https://maps.google.com",
+                        rsvpForm: "https://forms.gle/tuposiblelink", // Link a tu Google Form
+                        driveAlbum: "https://drive.google.com", // Link para subir fotos
+                        playlist: "https://spotify.com" // Link Spotify o Form para música
+                    },
+
+                    galeria: {
+                        cantidad: 12 // Número de fotos a mostrar (debe haber foto1.jpg, foto2.jpg...)
+                    },
+
+                    // ACTIVAR O DESACTIVAR SECCIONES (true para mostrar, false para ocultar)
+                    secciones: {
+                        ubicacion: true,
+                        galeria: true,
+                        dressCode: true,
+                        regalos: true,
+                        playlist: true,
+                        albumDrive: true
+                    }
+                },
+
+                /* Lógica del Sistema (No tocar a menos que sepa programar) */
+                started: false,
+                playing: false,
+                countdown: { días: 0, horas: 0, min: 0, seg: 0 },
+
+                startExperience() {
+                    this.started = true;
+                    this.playMusic();
+                    this.startCountdown();
+                },
+
+                playMusic() {
+                    const music = document.getElementById('bgMusic');
+                    music.play().then(() => {
+                        this.playing = true;
+                    }).catch(() => {
+                        console.log("Autoplay bloqueado");
+                    });
+                },
+
+                toggleMusic() {
+                    const music = document.getElementById('bgMusic');
+                    if (this.playing) {
+                        music.pause();
+                    } else {
+                        music.play();
+                    }
+                    this.playing = !this.playing;
+                },
+
+                startCountdown() {
+                    setInterval(() => {
+                        const now = new Date().getTime();
+                        const dist = this.config.fechaEvento.getTime() - now;
+                        this.countdown.días = Math.floor(dist / (1000 * 60 * 60 * 24));
+                        this.countdown.horas = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        this.countdown.min = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                        this.countdown.seg = Math.floor((dist % (1000 * 60)) / 1000);
+                    }, 1000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
