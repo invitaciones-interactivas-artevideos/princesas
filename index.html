@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis 15 Años - Invitación Premium</title>
+    
+    <!-- Fuentes Reales -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Great+Vibes&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Scripts de Estilo y Lógica -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        :root { --royal-blue: #0f172a; --gold: #d4af37; --accent: #60a5fa; }
+        
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background-color: var(--royal-blue); 
+            color: white; 
+            margin: 0; 
+            overflow-x: hidden;
+        }
+
+        .font-title { font-family: 'Great Vibes', cursive; }
+        .font-royal { font-family: 'Cinzel Decorative', serif; }
+
+        /* Fondo Animado */
+        .magic-bg {
+            background: radial-gradient(circle at center, #1e3a8a 0%, #020617 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .stars-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+        }
+
+        .gold-glow {
+            color: #fef3c7;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Animación del Zapato */
+        .shoe-float {
+            animation: floatingShoe 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(96, 165, 250, 0.6));
+        }
+
+        @keyframes floatingShoe {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+        }
+
+        .btn-premium:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+        }
+    </style>
+</head>
+<body class="magic-bg" x-data="invitationApp()">
+    <div class="stars-overlay"></div>
+
+    <!-- PANTALLA DE INGRESO -->
+    <div x-show="!started" 
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950 text-center p-6"
+         x-transition:leave="transition ease-in duration-800"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div class="animate__animated animate__zoomIn">
+            <!-- Imagen del Zapato proporcionada -->
+            <img src="zapato.png" alt="Zapato de Cristal" class="w-64 h-auto mx-auto mb-8 shoe-float">
+            
+            <h2 class="font-royal text-2xl gold-glow mb-2 tracking-widest uppercase">Bienvenidos a un Cuento de Hadas</h2>
+            <p class="text-blue-200/60 italic mb-10">La magia está por comenzar...</p>
+            
+            <button @click="startInvitation()" 
+                    class="px-12 py-4 bg-blue-600 hover:bg-blue-500 rounded-full font-bold tracking-[0.2em] shadow-xl transition-all">
+                ABRIR INVITACIÓN
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main x-show="started" x-cloak class="relative z-10">
+        
+        <!-- MÚSICA -->
+        <button @click="toggleMusic()" class="fixed bottom-6 right-6 z-50 p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-full shadow-2xl">
+            <template x-if="playing"><span>🔊</span></template>
+            <template x-if="!playing"><span>🔇</span></template>
+        </button>
+
+        <!-- PORTADA -->
+        <header class="min-h-screen flex flex-col items-center justify-center text-center p-6">
+            <div class="animate__animated animate__fadeInDown">
+                <p class="font-royal text-blue-300 tracking-[0.5em] mb-4 text-sm" x-text="config.textoInicioSub"></p>
+                <h1 class="font-title text-8xl md:text-[10rem] mb-6 gold-glow" x-text="config.nombreQuinceanera"></h1>
+                <p class="max-w-2xl mx-auto text-lg md:text-xl italic opacity-90 px-4 leading-relaxed" x-text="config.fraseInicio"></p>
+            </div>
+            <div class="mt-12 animate-bounce opacity-30 text-3xl">↓</div>
+        </header>
+
+        <!-- CUENTA REGRESIVA -->
+        <section class="py-20 px-6">
+            <div class="max-w-4xl mx-auto glass-card p-10 text-center">
+                <h3 class="font-royal text-xl mb-10 tracking-widest text-blue-200">FALTAN PARA EL GRAN BAILE...</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <template x-for="(val, unit) in countdown" :key="unit">
+                        <div class="flex flex-col">
+                            <span class="text-4xl md:text-6xl font-light" x-text="val"></span>
+                            <span class="text-[10px] uppercase tracking-[0.2em] opacity-50" x-text="unit"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- UBICACIÓN -->
+        <template x-if="config.secciones.ubicacion">
+            <section class="py-24 px-6 text-center">
+                <div class="max-w-2xl mx-auto">
+                    <span class="text-4xl mb-6 block">🏰</span>
+                    <h2 class="font-royal text-3xl mb-6 gold-glow uppercase">¿DÓNDE Y CUÁNDO?</h2>
+                    <p class="text-2xl mb-2" x-text="config.datosEvento.salon"></p>
+                    <p class="opacity-70 mb-4" x-text="config.datosEvento.direccion"></p>
+                    <p class="text-xl font-royal text-blue-300 mb-10" x-text="config.datosEvento.fechaHora"></p>
+                    <a :href="config.links.googleMaps" target="_blank" class="px-8 py-3 border border-blue-400 rounded-full hover:bg-blue-600 transition uppercase text-xs tracking-widest">
+                        CÓMO LLEGAR (GPS)
+                    </a>
+                </div>
+            </section>
+        </template>
+
+        <!-- GALERÍA -->
+        <template x-if="config.secciones.galeria">
+            <section class="py-20 px-4 bg-black/20">
+                <h2 class="font-royal text-3xl text-center mb-12 gold-glow uppercase">RECUERDOS REALES</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+                    <template x-for="i in config.galeria.cantidad">
+                        <div class="aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                            <img :src="'foto' + i + '.jpg'" class="w-full h-full object-cover hover:scale-110 transition duration-1000" alt="Foto">
+                        </div>
+                    </template>
+                </div>
+            </section>
+        </template>
+
+        <!-- DRESS CODE Y REGALOS -->
+        <section class="py-20 px-6 grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <template x-if="config.secciones.dressCode">
+                <div class="glass-card p-12 text-center">
+                    <span class="text-4xl mb-4 block">👗</span>
+                    <h3 class="font-royal text-xl mb-6 text-blue-200">DRESS CODE</h3>
+                    <p class="text-lg font-semibold" x-text="config.dressCode.tipo"></p>
+                    <p class="text-sm italic opacity-60 mt-4 leading-relaxed" x-text="config.dressCode.nota"></p>
+                </div>
+            </template>
+            <template x-if="config.secciones.regalos">
+                <div class="glass-card p-12 text-center">
+                    <span class="text-4xl mb-4 block">🎁</span>
+                    <h3 class="font-royal text-xl mb-6 text-blue-200">REGALOS</h3>
+                    <p class="text-sm mb-6 opacity-80" x-text="config.regalos.texto"></p>
+                    <div class="text-xs font-mono bg-blue-900/40 p-5 rounded-xl border border-white/5 space-y-2">
+                        <p>Alias: <span class="text-blue-200" x-text="config.regalos.alias"></span></p>
+                        <p>CBU: <span class="text-blue-200 break-all" x-text="config.regalos.cbu"></span></p>
+                    </div>
+                </div>
+            </template>
+        </section>
+
+        <!-- CONFIRMACIÓN Y BOTONES INTERACTIVOS -->
+        <section class="py-24 px-6 text-center">
+            <div class="max-w-4xl mx-auto glass-card p-12 border-t-2 border-blue-500/50 shadow-2xl">
+                <h2 class="font-royal text-4xl mb-8 gold-glow uppercase">Confirmación</h2>
+                <p class="mb-12 opacity-80 text-lg">¿Nos acompañas en esta noche mágica?</p>
+                
+                <!-- BOTÓN RSVP CORREGIDO -->
+                <a :href="config.links.rsvpForm" target="_blank" 
+                   class="btn-premium px-10 py-5 w-full max-w-sm text-white rounded-full font-bold text-lg tracking-[0.1em] uppercase mb-12">
+                    CONFIRMAR ASISTENCIA
+                </a>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <template x-if="config.secciones.playlist">
+                        <a :href="config.links.playlist" target="_blank" class="p-6 glass-card hover:bg-white/10 transition block border border-blue-400/20">
+                            <span class="block text-3xl mb-2">🎵</span>
+                            <p class="font-royal text-xs uppercase tracking-widest text-blue-200">Sugerir Canción</p>
+                        </a>
+                    </template>
+                    <template x-if="config.secciones.albumDrive">
+                        <a :href="config.links.driveAlbum" target="_blank" class="p-6 glass-card hover:bg-white/10 transition block border border-blue-400/20">
+                            <span class="block text-3xl mb-2">📸</span>
+                            <p class="font-royal text-xs uppercase tracking-widest text-blue-200">Subir Fotos al Álbum</p>
+                        </a>
+                    </template>
+                </div>
+                <p class="mt-8 text-[10px] opacity-40 uppercase tracking-widest">Favor de confirmar antes del <span x-text="config.datosEvento.fechaLimite"></span></p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-24 text-center px-6">
+            <!-- Icono Temático (Tiara) -->
+            <svg class="w-16 h-16 mx-auto mb-8 opacity-40 text-blue-200" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8zm-5-9h10v2H7z"/>
+                <path d="M12 4l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4l2-4z"/>
+            </svg>
+            <p class="font-title text-6xl gold-glow mb-6" x-text="config.textoFinal"></p>
+            <p class="font-royal text-[10px] tracking-[0.8em] opacity-30 uppercase">The Royal Celebration • 2025</p>
+        </footer>
+
+    </main>
+
+    <!-- ARCHIVO DE AUDIO -->
+    <audio id="bgMusic" loop>
+        <source src="musica.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function invitationApp() {
+            return {
+                /* ============================================================
+                   PANEL DE CONFIGURACIÓN (EDITA AQUÍ)
+                ============================================================ */
+                config: {
+                    nombreQuinceanera: "Valentina",
+                    textoInicioSub: "MIS QUINCE AÑOS",
+                    fraseInicio: "Hay momentos en la vida que son especiales por sí solos, pero compartirlos con las personas que más quieres los hace inolvidables.",
+                    textoFinal: "Te espero para vivir este sueño...",
+                    
+                    // Año, Mes (0-11), Día, Hora
+                    fechaEvento: new Date(2025, 11, 20, 21, 0, 0),
+
+                    datosEvento: {
+                        salon: "Palacio de Cristal Eventos",
+                        direccion: "Avenida de la Realeza 123, Ciudad Mágica",
+                        fechaHora: "Sábado 20 de Diciembre | 21:00 Horas",
+                        fechaLimite: "10 de Diciembre"
+                    },
+
+                    dressCode: {
+                        tipo: "Etiqueta Rigurosa / Gala",
+                        nota: "Se reserva el color Azul exclusivamente para la Quinceañera."
+                    },
+
+                    regalos: {
+                        texto: "Tu presencia es mi mayor regalo, pero si deseas hacerme un presente, puedes realizarlo aquí:",
+                        alias: "VALENTINA.15.BAILE",
+                        cbu: "0000003100012345678901"
+                    },
+
+                    links: {
+                        googleMaps: "https://maps.google.com",
+                        rsvpForm: "https://forms.gle/tu-link-google-form",
+                        driveAlbum: "https://drive.google.com/drive/folders/tu-id",
+                        playlist: "https://spotify.com"
+                    },
+
+                    galeria: { cantidad: 12 },
+
+                    // Activar o desactivar secciones
+                    secciones: {
+                        ubicacion: true,
+                        galeria: true,
+                        dressCode: true,
+                        regalos: true,
+                        playlist: true,
+                        albumDrive: true
+                    }
+                },
+
+                /* Lógica de Funcionamiento */
+                started: false,
+                playing: false,
+                countdown: { días: 0, horas: 0, min: 0, seg: 0 },
+
+                startInvitation() {
+                    this.started = true;
+                    this.playMusic();
+                    this.startCountdown();
+                    window.scrollTo(0,0);
+                },
+
+                playMusic() {
+                    const audio = document.getElementById('bgMusic');
+                    audio.play().then(() => { this.playing = true; }).catch(e => console.log("Audio en espera"));
+                },
+
+                toggleMusic() {
+                    const audio = document.getElementById('bgMusic');
+                    if (this.playing) audio.pause(); else audio.play();
+                    this.playing = !this.playing;
+                },
+
+                startCountdown() {
+                    setInterval(() => {
+                        const now = new Date().getTime();
+                        const dist = this.config.fechaEvento.getTime() - now;
+                        this.countdown.días = Math.floor(dist / (1000 * 60 * 60 * 24));
+                        this.countdown.horas = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        this.countdown.min = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
+                        this.countdown.seg = Math.floor((dist % (1000 * 60)) / 1000);
+                    }, 1000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
